@@ -25,4 +25,8 @@ class CoursePage extends Model
         return $this->hasMany(QuizOption::class);
     }
 
+    public function correctAnswer() {
+        return $this->belongsTo(QuizOption::class);
+    }
+
 }

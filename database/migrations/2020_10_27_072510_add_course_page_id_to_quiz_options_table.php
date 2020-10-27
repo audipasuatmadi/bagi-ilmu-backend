@@ -14,7 +14,7 @@ class AddCoursePageIdToQuizOptionsTable extends Migration
     public function up()
     {
         Schema::table('quiz_options', function (Blueprint $table) {
-            $table->foreignId('course_page_id')->constrained();
+            $table->foreignId('course_page_id')->constrained()->onDelete('cascade');
         });
     }
 

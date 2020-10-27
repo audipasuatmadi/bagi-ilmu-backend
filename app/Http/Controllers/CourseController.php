@@ -30,6 +30,8 @@ class CourseController extends Controller
 
     public function addCourse(Request $request) {
 
+
+
         $configData = [
             'courseTitle' => $request['courseConfig']['courseTitle'],
             'courseShortDescription' => $request['courseConfig']['courseShortDescription'],
@@ -43,29 +45,18 @@ class CourseController extends Controller
         $pageData = $request['pageData'];
         $course = $this->insertNewCourse($request, $courseConfig);
         
+        
 
         foreach ($pageData as $page) {
-            $newCoursePage = new CoursePage();
-            $newCoursePage->page_index = $page['pageNumber'];
-
-            $course->coursePages()->save($newCoursePage);
+            $newCoursePage = $this->insertNewPage($page, $course);
 
             foreach ($page['contents'] as $content) {
-                $material = new Material();
-                $material->section_index = $content['sectionIndex'];
-                $material->is_code = $content['isCode'];
-                $material->content = $content['content'];
-                
-                $newCoursePage->materials()->save($material);
+                $this->insertNewMaterial($content, $newCoursePage);
             }
 
             if ($page['isQuiz']) {
                 foreach ($page['quizContents'] as $quizContent) {
-
-                    $quizOption = new QuizOption();
-                    $quizOption['contents'] = $quizContent['content'];
-                    $newCoursePage->quizOptions()->save($quizOption);
-                    
+                    $this->insertNewQuiz($quizContent, $newCoursePage);
                 }
             }
 
@@ -82,5 +73,30 @@ class CourseController extends Controller
         $user->courses()->save($course);
 
         return $course;
+    }
+
+    private function insertNewPage($pageData, $course) {
+        $newCoursePage = new CoursePage();
+        $newCoursePage->page_index = $pageData['pageNumber'];
+        $newCoursePage->is_quiz = $pageData['isQuiz'];
+
+        $course->coursePages()->save($newCoursePage);
+
+        return $newCoursePage;
+    }
+
+    private function insertNewMaterial ($content, $newCoursePage) {
+        $material = new Material();
+        $material->section_index = $content['sectionIndex'];
+        $material->is_code = $content['isCode'];
+        $material->content = $content['content'];
+        
+        $newCoursePage->materials()->save($material);
+    }
+
+    private function insertNewQuiz($quizContent, $newCoursePage) {
+        $quizOption = new QuizOption();
+        $quizOption['contents'] = $quizContent['content'];
+        $newCoursePage->quizOptions()->save($quizOption);
     }
 }
