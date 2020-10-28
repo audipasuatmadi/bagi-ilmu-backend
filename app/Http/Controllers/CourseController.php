@@ -63,6 +63,26 @@ class CourseController extends Controller
         }
     }
 
+    public function getPagination() {
+        $courses = Course::query()->orderByDesc('id')->paginate(5);
+        
+        $formattedCourse = [];
+        foreach($courses as $course) {
+            $courseObj = [
+                'id' => $course->id,
+                'title' => $course->title,
+                'shortDescription' => $course->short_description,
+                'creatorName' => $course->user->name
+            ];
+            
+            array_push($formattedCourse, $courseObj);
+        }
+
+        $course['data'] = $formattedCourse;
+
+        return $course;
+    }
+
     private function insertNewCourse($request, $courseConfig) {
         $course = new Course();
         $course->title = $courseConfig['courseTitle'];
