@@ -83,6 +83,20 @@ class CourseController extends Controller
         return $course;
     }
 
+    public function getDetails(Request $request, $id) {
+        $courseModel = Course::find($id);
+
+        $course = [
+            'id' => $courseModel->id,
+            'title' => $courseModel->title,
+            'shortDescription' => $courseModel->short_description,
+            'description' => $courseModel->long_description,
+            'creatorName' => $courseModel->user->name
+        ];
+
+        return response()->json($course);
+    }
+
     private function insertNewCourse($request, $courseConfig) {
         $course = new Course();
         $course->title = $courseConfig['courseTitle'];
