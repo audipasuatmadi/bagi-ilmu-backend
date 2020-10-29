@@ -26,6 +26,8 @@ Route::prefix('course')->group(function() {
     Route::post('add', [CourseController::class, 'addCourse']);
 
     Route::get('list', [CourseController::class, 'getPagination']);
+
+    Route::get('details/{id}', [CourseController::class, 'getDetails']);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
