@@ -21,4 +21,8 @@ class Course extends Model
         return $this->hasMany(CoursePage::class);
     }
 
+    public function joinedUsers() {
+        return $this->belongsToMany(User::class, 'user_course');
+    }
+
 }

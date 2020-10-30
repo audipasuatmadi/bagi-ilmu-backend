@@ -25,7 +25,13 @@ Route::prefix('user')->group(function() {
 Route::prefix('course')->group(function() {
     Route::post('add', [CourseController::class, 'addCourse']);
 
+    Route::post('join', [CourseController::class, 'joinCourse']);
+
     Route::get('list', [CourseController::class, 'getPagination']);
+
+    Route::get('list/my', [CourseController::class, 'getMyPagination']);
+
+    Route::get('total', [CourseController::class, 'getTotalCourseCount']);
 
     Route::get('details/{id}', [CourseController::class, 'getDetails']);
 });

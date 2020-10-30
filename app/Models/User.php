@@ -33,6 +33,10 @@ class User extends Authenticatable
         return $this->hasMany(Course::class);
     }
 
+    public function joinedCourses() {
+        return $this->belongsToMany(Course::class, 'user_course');
+    }
+
     // /**
     //  * The attributes that should be cast to native types.
     //  *

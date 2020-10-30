@@ -74,7 +74,6 @@ class CourseController extends Controller
                 'shortDescription' => $course->short_description,
                 'creatorName' => $course->user->name
             ];
-            
             array_push($formattedCourse, $courseObj);
         }
 
@@ -83,18 +82,68 @@ class CourseController extends Controller
         return $course;
     }
 
+    public function getMyPagination(Request $request) {
+        $user = $request->user();
+        if ($user) {
+            $joinedUnformattedCourse = $user->joinedCourses;
+            $courses = [];
+
+            foreach($joinedUnformattedCourse as $courseModel) {
+                $course = [
+                    'id' => $courseModel->id,
+                    'title' => $courseModel->title,
+                    'shortDescription' => $courseModel->short_description,
+                    'description' => $courseModel->long_description,
+                    'creatorName' => $courseModel->user->name
+                ];
+                array_push($courses, $course);
+            }
+
+            return response()->json($courses);
+        }
+        return response(null, '403');
+    }
+
     public function getDetails(Request $request, $id) {
         $courseModel = Course::find($id);
+
+        $isJoined = false;
+
+        if ($request->user()) {
+            if ($request->user()->joinedCourses()->where('course_id', $courseModel['id'])->first()) {
+                $isJoined = true;
+            }
+        }
+
+        error_log($isJoined);
 
         $course = [
             'id' => $courseModel->id,
             'title' => $courseModel->title,
             'shortDescription' => $courseModel->short_description,
             'description' => $courseModel->long_description,
-            'creatorName' => $courseModel->user->name
+            'creatorName' => $courseModel->user->name,
+            'isJoined' => $isJoined
         ];
 
         return response()->json($course);
+    }
+
+    public function joinCourse(Request $request) {
+        $user = $request->user();
+        $courseId = $request->input('courseId');
+
+        $hasJoined = $user->joinedCourses()->where('course_id', $courseId)->first();
+        if (!$hasJoined) {
+            $user->joinedCourses()->attach($courseId);
+            return response(null, 200);
+        }
+        return response('user already joined the course', 409);
+    }
+
+    public function getTotalCourseCount() {
+        $count = Course::count();
+        return $count;
     }
 
     private function insertNewCourse($request, $courseConfig) {
