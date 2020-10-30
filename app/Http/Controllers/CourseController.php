@@ -146,6 +146,45 @@ class CourseController extends Controller
         return $count;
     }
 
+    public function getOngoingCourse(Request $request, $courseId, $pageIndex) {
+        $user = $request->user();
+        if (!$user) {
+            return response(null, 401);
+        }
+
+
+        $courseData = $user->joinedCourses()->where('course_id', $courseId)->first();
+        if (!$courseData) {
+            return response(null, 401);
+        }
+        $pageData = $courseData->coursePages()->where('page_index', $pageIndex)->first();
+        
+        if (!$pageData) {
+            return response("halaman tidak ditemukan", 404);
+        }
+        
+        $formattedContents = [];
+        foreach($pageData->materials as $content) {
+            array_push($formattedContents, [
+                "id" => $content['id'],
+                "sectionIndex" => $content['section_index'],
+                "isCode" => $content['is_code'],
+                "content" => $content['content']
+            ]);
+        }
+
+        $formattedPageData = [
+            "pageId" => $pageData['id'],
+            "courseId" => $pageData['course_id'],
+            "pageNumber" => $pageData['page_index'],
+            "isQuiz" => $pageData['is_quiz'],
+            "contents" => $formattedContents
+        ];
+
+        return response()->json($formattedPageData);
+        
+    }
+
     private function insertNewCourse($request, $courseConfig) {
         $course = new Course();
         $course->title = $courseConfig['courseTitle'];

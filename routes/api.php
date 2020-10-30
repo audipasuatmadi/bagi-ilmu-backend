@@ -34,6 +34,8 @@ Route::prefix('course')->group(function() {
     Route::get('total', [CourseController::class, 'getTotalCourseCount']);
 
     Route::get('details/{id}', [CourseController::class, 'getDetails']);
+
+    Route::get('ongoing/{courseId}/{pageIndex}', [CourseController::class, 'getOngoingCourse']);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
