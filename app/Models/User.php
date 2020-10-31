@@ -34,7 +34,7 @@ class User extends Authenticatable
     }
 
     public function joinedCourses() {
-        return $this->belongsToMany(Course::class, 'user_course');
+        return $this->belongsToMany(Course::class, 'course_user')->withTimestamps();
     }
 
     // /**

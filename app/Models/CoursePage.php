@@ -10,7 +10,7 @@ class CoursePage extends Model
     use HasFactory;
 
     protected $fillable = [
-        'page_index', 'created_at', 'updated_at', 'quiz_option_id'
+        'page_index', 'created_at', 'updated_at', 'is_quiz'
     ];
 
     public function course() {

@@ -2,6 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Course;
+use App\Models\CoursePage;
+use App\Models\Material;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,6 +17,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
+        User::factory(10)
+            ->has(
+                Course::factory()
+                ->count(3)
+                ->has(CoursePage::factory()
+                    ->count(5)
+                    ->has(Material::factory()
+                        ->count(10), 'materials')
+                    , 'coursePages')
+                , 'courses')
+
+            ->create();
     }
 }

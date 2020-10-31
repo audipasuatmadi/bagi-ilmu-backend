@@ -22,7 +22,8 @@ class Course extends Model
     }
 
     public function joinedUsers() {
-        return $this->belongsToMany(User::class, 'user_course');
+        return $this->belongsToMany(User::class, 'course_user')
+            ->withTimestamps();
     }
 
 }
