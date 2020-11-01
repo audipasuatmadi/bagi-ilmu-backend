@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Course;
 use App\Models\CoursePage;
 use App\Models\Material;
+use App\Models\QuizOption;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -25,6 +26,8 @@ class DatabaseSeeder extends Seeder
                     ->count(5)
                     ->has(Material::factory()
                         ->count(10), 'materials')
+                    ->has(QuizOption::factory()
+                        ->count(4), 'quizOptions')
                     , 'coursePages')
                 , 'courses')
 

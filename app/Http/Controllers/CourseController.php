@@ -7,6 +7,7 @@ use App\Models\CoursePage;
 use App\Models\Material;
 use App\Models\QuizOption;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 
 class CourseController extends Controller
@@ -173,16 +174,51 @@ class CourseController extends Controller
             ]);
         }
 
-        $formattedPageData = [
-            "pageId" => $pageData['id'],
-            "courseId" => $pageData['course_id'],
-            "pageNumber" => $pageData['page_index'],
-            "isQuiz" => $pageData['is_quiz'],
-            "contents" => $formattedContents
-        ];
+        if ($pageData['is_quiz']) {
+            $formattedQuiz = [];
+            foreach($pageData->quizOptions as $options) {
+                array_push($formattedQuiz, [
+                    "id" => $options['id'],
+                    "content" => $options['contents']
+                ]);
+            }
 
-        return response()->json($formattedPageData);
-        
+            $shuffeledFormatedQuiz = collect($formattedQuiz);
+            $formattedQuiz = $shuffeledFormatedQuiz->shuffle();
+
+            $formattedPageData = [
+                "pageId" => $pageData['id'],
+                "courseId" => $pageData['course_id'],
+                "pageNumber" => $pageData['page_index'],
+                "isQuiz" => $pageData['is_quiz'],
+                "contents" => $formattedContents,
+                "quizContents" => $formattedQuiz
+            ];
+        } else {
+            $formattedPageData = [
+                "pageId" => $pageData['id'],
+                "courseId" => $pageData['course_id'],
+                "pageNumber" => $pageData['page_index'],
+                "isQuiz" => $pageData['is_quiz'],
+                "contents" => $formattedContents
+            ];
+        }
+
+        $count = $courseData->coursePages->count();
+
+        return response()->json(["pageData"=> $formattedPageData, "totalPages"=>$count]);
+
+    }
+
+    public function validateOption(Request $request, $courseId, $pageIndex, $optionId) {
+        $course = Course::firstWhere('id', $courseId);
+        $page = $course->coursePages()->where('page_index', $pageIndex)->first();
+        $correctOption = $page->quizOptions[0];
+
+        $result = $optionId == $correctOption->id;
+
+        return response()->json(["result"=>$result]);
+        // return response()->json($correctOption);
     }
 
     private function insertNewCourse($request, $courseConfig) {

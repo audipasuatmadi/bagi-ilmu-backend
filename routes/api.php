@@ -37,6 +37,8 @@ Route::prefix('course')->group(function() {
     Route::get('details/{id}', [CourseController::class, 'getDetails']);
 
     Route::get('ongoing/{courseId}/{pageIndex}', [CourseController::class, 'getOngoingCourse']);
+
+    Route::get('ongoing/{courseId}/{pageIndex}/{optionId}', [CourseController::class, 'validateOption']);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
