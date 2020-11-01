@@ -158,6 +158,13 @@ class CourseController extends Controller
 
 
         $courseData = $user->joinedCourses()->where('course_id', $courseId)->first();
+        $count = $courseData->details->progress;
+
+        if ($count < $pageIndex) {
+            error_log("thrill");
+            return response("anda belum mencapai tahap ini", 401);
+        }
+
         if (!$courseData) {
             return response(null, 401);
         }
@@ -207,7 +214,7 @@ class CourseController extends Controller
             ];
         }
 
-        $count = $courseData->details->progress;
+        
 
         return response()->json(["pageData"=> $formattedPageData, "totalPages"=>$count]);
 
