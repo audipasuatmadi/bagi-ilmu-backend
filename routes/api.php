@@ -40,7 +40,6 @@ Route::prefix('course')->group(function() {
 
     Route::get('ongoing/{courseId}/{pageIndex}/{optionId}', [CourseController::class, 'validateOption']);
 });
-
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

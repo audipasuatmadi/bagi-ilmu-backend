@@ -34,7 +34,7 @@ class User extends Authenticatable
     }
 
     public function joinedCourses() {
-        return $this->belongsToMany(Course::class, 'course_user')->withTimestamps();
+        return $this->belongsToMany(Course::class)->using(CourseUser::class)->withPivot('progress')->as('details');
     }
 
     // /**

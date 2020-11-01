@@ -137,6 +137,9 @@ class CourseController extends Controller
         $hasJoined = $user->joinedCourses()->where('course_id', $courseId)->first();
         if (!$hasJoined) {
             $user->joinedCourses()->attach($courseId);
+            $pivot = $user->joinedCourses()->where('course_id', $courseId)->first()->details;
+            $pivot->progress = $this->findLatestQuizIndex(Course::where('id', $courseId)->first(), 1);
+            $pivot->save();
             return response(null, 200);
         }
         return response('user already joined the course', 409);
@@ -204,7 +207,7 @@ class CourseController extends Controller
             ];
         }
 
-        $count = $courseData->coursePages->count();
+        $count = $courseData->details->progress;
 
         return response()->json(["pageData"=> $formattedPageData, "totalPages"=>$count]);
 
@@ -217,8 +220,32 @@ class CourseController extends Controller
 
         $result = $optionId == $correctOption->id;
 
-        return response()->json(["result"=>$result]);
-        // return response()->json($correctOption);
+        $user = $request->user();
+        $pivotData = $user->joinedCourses()->where('course_id', $courseId)->first()->details;
+
+        if ($result) {
+            if ($pivotData->progress <= $pageIndex) {
+                $pivotData->progress = $this->findLatestQuizIndex($course, $pivotData->progress);
+                $pivotData->save();
+            }
+        }
+
+        return response()->json(["result"=>$result, "newProgress"=>$pivotData->progress]);
+    }
+
+    private function findLatestQuizIndex($course, $currentProgress) {
+        $allPages = $course->coursePages;
+        $newProgress = $currentProgress;
+        foreach($allPages as $page) {
+            if ($page['is_quiz']) {
+                if ($page['page_index'] > $currentProgress) {
+                    $newProgress = $page['page_index'];
+                    break;
+                }
+            }
+        }
+
+        return $newProgress;
     }
 
     private function insertNewCourse($request, $courseConfig) {

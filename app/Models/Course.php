@@ -22,8 +22,8 @@ class Course extends Model
     }
 
     public function joinedUsers() {
-        return $this->belongsToMany(User::class, 'course_user')
-            ->withTimestamps();
+        return $this->belongsToMany(User::class)
+            ->using(CourseUser::class)->withPivot('progress')->as('details');
     }
 
 }
