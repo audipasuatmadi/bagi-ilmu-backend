@@ -86,7 +86,7 @@ class CourseController extends Controller
     public function getMyPagination(Request $request) {
         $user = $request->user();
         if ($user) {
-            $joinedUnformattedCourse = $user->joinedCourses;
+            $joinedUnformattedCourse = $user->joinedCourses()->orderBy('course_user.created_at', 'desc')->get();
             $courses = [];
 
             foreach($joinedUnformattedCourse as $courseModel) {
