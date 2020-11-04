@@ -240,6 +240,23 @@ class CourseController extends Controller
         return response()->json(["result"=>$result, "newProgress"=>$pivotData->progress]);
     }
 
+    public function getCreatedCourses(Request $request) {
+        $user = $request->user();
+        $courses = $user->courses()->select('id', 'title', 'is_published as isPublished')->get();
+
+        return response()->json($courses);
+    }
+
+    public function toggleIsPublished(Request $request, $courseId) {
+        $user = $request->user();
+        $selectedCourse = $user->courses()->find($courseId);
+        $selectedCourse->is_published = !$selectedCourse->is_published;
+
+        $selectedCourse->save();
+
+        return $this->getCreatedCourses($request);
+    }
+
     private function findLatestQuizIndex($course, $currentProgress) {
         $allPages = $course->coursePages;
         $newProgress = $currentProgress;

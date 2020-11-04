@@ -32,6 +32,10 @@ Route::prefix('course')->group(function() {
 
     Route::get('list/my', [CourseController::class, 'getMyPagination']);
 
+    Route::get('list/created', [CourseController::class, 'getCreatedCourses']);
+    
+    Route::post('ispublished/{courseId}', [CourseController::class, 'toggleIsPublished']);
+    
     Route::get('total', [CourseController::class, 'getTotalCourseCount']);
 
     Route::get('details/{id}', [CourseController::class, 'getDetails']);
