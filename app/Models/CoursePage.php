@@ -13,20 +13,23 @@ class CoursePage extends Model
         'page_index', 'created_at', 'updated_at', 'is_quiz'
     ];
 
-    public function course() {
+    public function course()
+    {
         return $this->belongsTo(Course::class);
     }
 
-    public function materials() {
+    public function materials()
+    {
         return $this->hasMany(Material::class);
     }
 
-    public function quizOptions() {
+    public function quizOptions()
+    {
         return $this->hasMany(QuizOption::class);
     }
 
-    public function correctAnswer() {
+    public function correctAnswer()
+    {
         return $this->belongsTo(QuizOption::class);
     }
-
 }

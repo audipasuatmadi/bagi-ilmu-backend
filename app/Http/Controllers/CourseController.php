@@ -29,7 +29,8 @@ class CourseController extends Controller
         'courseDescription' => 'Deskripsi Course'
     ];
 
-    public function addCourse(Request $request) {
+    public function addCourse(Request $request)
+    {
 
 
 
@@ -38,15 +39,15 @@ class CourseController extends Controller
             'courseShortDescription' => $request['courseConfig']['courseShortDescription'],
             'courseDescription' => $request['courseConfig']['courseDescription']
         ];
-        
+
         $validator = Validator::make($configData, $this->configRules, $this->customMessage, $this->customAttributes);
         $validator->validate();
 
-        $courseConfig = $request['courseConfig'];        
+        $courseConfig = $request['courseConfig'];
         $pageData = $request['pageData'];
         $course = $this->insertNewCourse($request, $courseConfig);
-        
-        
+
+
 
         foreach ($pageData as $page) {
             $newCoursePage = $this->insertNewPage($page, $course);
@@ -60,15 +61,15 @@ class CourseController extends Controller
                     $this->insertNewQuiz($quizContent, $newCoursePage);
                 }
             }
-
         }
     }
 
-    public function getPagination() {
+    public function getPagination()
+    {
         $courses = Course::query()->orderByDesc('id')->paginate(5);
-        
+
         $formattedCourse = [];
-        foreach($courses as $course) {
+        foreach ($courses as $course) {
             $courseObj = [
                 'id' => $course->id,
                 'title' => $course->title,
@@ -83,13 +84,14 @@ class CourseController extends Controller
         return $course;
     }
 
-    public function getMyPagination(Request $request) {
+    public function getMyPagination(Request $request)
+    {
         $user = $request->user();
         if ($user) {
             $joinedUnformattedCourse = $user->joinedCourses()->orderBy('course_user.created_at', 'desc')->get();
             $courses = [];
 
-            foreach($joinedUnformattedCourse as $courseModel) {
+            foreach ($joinedUnformattedCourse as $courseModel) {
                 $course = [
                     'id' => $courseModel->id,
                     'title' => $courseModel->title,
@@ -105,8 +107,11 @@ class CourseController extends Controller
         return response(null, '403');
     }
 
-    public function getDetails(Request $request, $id) {
+    public function getDetails(Request $request, $id)
+    {
         $courseModel = Course::find($id);
+
+
 
         $isJoined = false;
 
@@ -130,7 +135,8 @@ class CourseController extends Controller
         return response()->json($course);
     }
 
-    public function joinCourse(Request $request) {
+    public function joinCourse(Request $request)
+    {
         $user = $request->user();
         $courseId = $request->input('courseId');
 
@@ -145,12 +151,14 @@ class CourseController extends Controller
         return response('user already joined the course', 409);
     }
 
-    public function getTotalCourseCount() {
+    public function getTotalCourseCount()
+    {
         $count = Course::count();
         return $count;
     }
 
-    public function getOngoingCourse(Request $request, $courseId, $pageIndex) {
+    public function getOngoingCourse(Request $request, $courseId, $pageIndex)
+    {
         $user = $request->user();
         if (!$user) {
             return response(null, 401);
@@ -169,13 +177,13 @@ class CourseController extends Controller
             return response(null, 401);
         }
         $pageData = $courseData->coursePages()->where('page_index', $pageIndex)->first();
-        
+
         if (!$pageData) {
             return response("halaman tidak ditemukan", 404);
         }
-        
+
         $formattedContents = [];
-        foreach($pageData->materials as $content) {
+        foreach ($pageData->materials as $content) {
             array_push($formattedContents, [
                 "id" => $content['id'],
                 "sectionIndex" => $content['section_index'],
@@ -186,7 +194,7 @@ class CourseController extends Controller
 
         if ($pageData['is_quiz']) {
             $formattedQuiz = [];
-            foreach($pageData->quizOptions as $options) {
+            foreach ($pageData->quizOptions as $options) {
                 array_push($formattedQuiz, [
                     "id" => $options['id'],
                     "content" => $options['contents']
@@ -214,13 +222,13 @@ class CourseController extends Controller
             ];
         }
 
-        
 
-        return response()->json(["pageData"=> $formattedPageData, "totalPages"=>$count]);
 
+        return response()->json(["pageData" => $formattedPageData, "totalPages" => $count]);
     }
 
-    public function validateOption(Request $request, $courseId, $pageIndex, $optionId) {
+    public function validateOption(Request $request, $courseId, $pageIndex, $optionId)
+    {
         $course = Course::firstWhere('id', $courseId);
         $page = $course->coursePages()->where('page_index', $pageIndex)->first();
         $correctOption = $page->quizOptions[0];
@@ -237,17 +245,19 @@ class CourseController extends Controller
             }
         }
 
-        return response()->json(["result"=>$result, "newProgress"=>$pivotData->progress]);
+        return response()->json(["result" => $result, "newProgress" => $pivotData->progress]);
     }
 
-    public function getCreatedCourses(Request $request) {
+    public function getCreatedCourses(Request $request)
+    {
         $user = $request->user();
         $courses = $user->courses()->select('id', 'title', 'is_published as isPublished')->get();
 
         return response()->json($courses);
     }
 
-    public function toggleIsPublished(Request $request, $courseId) {
+    public function toggleIsPublished(Request $request, $courseId)
+    {
         $user = $request->user();
         $selectedCourse = $user->courses()->find($courseId);
         $selectedCourse->is_published = !$selectedCourse->is_published;
@@ -257,10 +267,11 @@ class CourseController extends Controller
         return $this->getCreatedCourses($request);
     }
 
-    private function findLatestQuizIndex($course, $currentProgress) {
+    private function findLatestQuizIndex($course, $currentProgress)
+    {
         $allPages = $course->coursePages;
         $newProgress = $currentProgress;
-        foreach($allPages as $page) {
+        foreach ($allPages as $page) {
             if ($page['is_quiz']) {
                 if ($page['page_index'] > $currentProgress) {
                     $newProgress = $page['page_index'];
@@ -272,19 +283,21 @@ class CourseController extends Controller
         return $newProgress;
     }
 
-    private function insertNewCourse($request, $courseConfig) {
+    private function insertNewCourse($request, $courseConfig)
+    {
         $course = new Course();
         $course->title = $courseConfig['courseTitle'];
         $course->short_description = $courseConfig['courseShortDescription'];
         $course->long_description = $courseConfig['courseDescription'];
-        
+
         $user = $request->user();
         $user->courses()->save($course);
 
         return $course;
     }
 
-    private function insertNewPage($pageData, $course) {
+    private function insertNewPage($pageData, $course)
+    {
         $newCoursePage = new CoursePage();
         $newCoursePage->page_index = $pageData['pageNumber'];
         $newCoursePage->is_quiz = $pageData['isQuiz'];
@@ -294,16 +307,18 @@ class CourseController extends Controller
         return $newCoursePage;
     }
 
-    private function insertNewMaterial ($content, $newCoursePage) {
+    private function insertNewMaterial($content, $newCoursePage)
+    {
         $material = new Material();
         $material->section_index = $content['sectionIndex'];
         $material->is_code = $content['isCode'];
         $material->content = $content['content'];
-        
+
         $newCoursePage->materials()->save($material);
     }
 
-    private function insertNewQuiz($quizContent, $newCoursePage) {
+    private function insertNewQuiz($quizContent, $newCoursePage)
+    {
         $quizOption = new QuizOption();
         $quizOption['contents'] = $quizContent['content'];
         $newCoursePage->quizOptions()->save($quizOption);
